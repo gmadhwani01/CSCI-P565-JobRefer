@@ -11,23 +11,6 @@ var express = require('express'),
 
 mongoose.Promise = global.Promise;
 
-//  nodemailer setup
-var transporter = nodemailer.createTransport(smtpTransport({
-    service: 'gmail',
-    host: 'smtp.gmail.com',
-    secureConnection: true,
-    auth: {
-        user: 'se.researchmate@gmail.com',
-        pass: 'agileteam'
-    }
-}));
-var mailOptions = {
-    from: 'se.researchmate@gmail.com',
-    to: 'jayendrakhandare@gmail.com',
-    subject: 'Sending Email using Node.js[nodemailer]',
-    text: 'Test Successful!'
-};
-
 
 //  hashing function
 var myHasher = function(password) {
@@ -35,77 +18,100 @@ var myHasher = function(password) {
     return hash;
 };
 
+function setupMongo() {
 // Connect to MongoDB on localhost:27017
-mongoose.connect('mongodb://localhost:27017/researchMate', { useMongoClient: true });
+    mongoose.connect('mongodb://localhost:27017/researchMate', { useMongoClient: true });
 
 //  importing a pre-defined model
-var User = require('./app/userModel');
+    var User = require('./app/userModel');
+}
 
-/*
+setupMongo();
+
+function addingUser() {
 //  creating a document
-var addUser = new User({
-    emailID:'7',
-    userName: '8',
-    firstName: 'j',
-    lastName: 'j',
-    passWord:'jdkflhg'
-});
+    var addUser = new User({
+        emailID: 'def',
+        userName: 'ff',
+        firstName: 'j',
+        lastName: 'j',
+        passWord: 'jdkflhg'
+    });
 
 //  encrypting password
-addUser.passWord = myHasher(addUser.passWord);
-//  adding a document
+    addUser.passWord = myHasher(addUser.passWord);
+//  adding a document to database
+    addUser.save(function (err) {
+        if (err) return console.log("User already exists.");
+        else console.log("New User Added : " + addUser.userName);
+    });
 
-addUser.save(function (err) {
-    if (err) return console.log("User already exists.");
-    else console.log("New User Added : " + addUser.userName);
-});
+    //  nodemailer setup
+    var transporter = nodemailer.createTransport(smtpTransport({
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        secureConnection: true,
+        auth: {
+            user: 'se.researchmate@gmail.com',
+            pass: 'agileteam'
+        }
+    }));
 
-//  updating a document     not working properly
-var query = {firstName:'j'};
-User.findOneAndUpdate(query,{firstName:'x'},function(err,upUser){
-    if (upUser == null)    console.log("Failed to Update.");
-    else    console.log("Update Successful.");
-});
+    var mailOptions = {
+        from: 'se.researchmate@gmail.com',
+        to: 'jayendrakhandare@gmail.com',
+        subject: 'Sending Email using Node.js[nodemailer]',
+        text: 'Added'
+    };
 
+    sendMaill();
+}
+function updatingUser() {
+//  updating a document
+    var query = {firstName: 'j'};
+    User.findOneAndUpdate(query, {firstName: 'x'}, function (err, upUser) {
+        if (upUser == null) console.log("Failed to Update.");
+        else console.log("Update Successful.");
+    });
+}
+
+function checkingUser() {
 //  viewing a document
-User.findOne({ 'userName': 'k' }, function (err, seeUser) {
-    if (seeUser == null) return console.log("Error. User not found.");
-    else console.log('%s %s', seeUser.firstName, seeUser.lastName)
-});
+    User.findOne({'userName': 'k'}, function (err, seeUser) {
+        if (seeUser == null) return false;
+        else {
+            console.log('%s %s', seeUser.firstName, seeUser.lastName);
+            return true;
+        }
+    });
+};
 
+function deletingUser() {
 //  removing a document
-var query = {"userName" : "j"};
-User.remove(query,function(){
-    console.log("User Removed Successfully.");
+    var query = {"userName": "j"};
+    User.remove(query, function () {
+        console.log("User Removed Successfully.");
+        return true;
     });
-*/
+}
 
+var sayHello = function(req,res,next){
+	res.send("Hello");
+	console.log(req);
+};
 
-/*
-app.get('/',function(req,res){
-    res.send('app/htmls/index.html');
-});
-
-app.listen(4500);
-console.log("Listening at localhost:4500");
-*/
-
-//to put a html page
-http.createServer(function (req, res) {
-    fs.readFile('./app/htmls/login.html', function(err, data) {
-        res.writeHead(200, {'Content-Type': 'text/html'});
-        res.write(data);
-        res.end();
-    });
-
-}).listen(8080);
-
+//app = connect();
+app.use(sayHello);
+app.listen(23456);
+console.log("Server running at silo.soic.indiana.edu:23456");
 
 //  sending mail using nodemailer
+function sendMaill() {
 transporter.sendMail(mailOptions, function(error, info){
-    if (error) {
-        console.log(error);
-    } else {
-        console.log('Email sent: ' + info.response);
-    }
-});
+	if (error) {
+           console.log(error);
+        } else {
+           console.log('Email sent: ' + info.response);
+        }
+});    
+}
