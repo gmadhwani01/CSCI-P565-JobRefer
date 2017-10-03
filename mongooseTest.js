@@ -8,11 +8,22 @@ var express = require('express'),
     fs = require('fs'),
     nodemailer = require('nodemailer'),
     smtpTransport = require('nodemailer-smtp-transport');
+	
+	app.use(bodyParser.urlencoded({
+    extended: true
+	}));
+
+/**bodyParser.json(options)
+ * Parses the text as JSON and exposes the resulting object on req.body.
+ */
+	app.use(bodyParser.json());
 
 mongoose.Promise = global.Promise;
 
 //  hashing function
 var myHasher = function(password) {
+	if(password.trim()=="")
+		return "";
     var hash = bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
     return hash;
 };
@@ -47,6 +58,7 @@ var User = require('./app/userModel');
 
 function addingUser(req,res,next) {
 //  creating a document
+	console.log(req.body.email);
     var addUser = new User({
         emailID: 'jayendrakhandare',
         userName: 'jkhandar',
@@ -122,11 +134,11 @@ function sayHello(req,res,next){
 
 
 //  accepting various calls to functions from client side
-app.get('/sayHello',sayHello);
-app.get('/addingUser',addingUser);
-app.get('/checkingUser',checkingUser);
-app.get('/deletingUser',deletingUser);
-app.get('/updatingUser',updatingUser);
+app.post('/sayHello',sayHello);
+app.post('/addingUser',addingUser);
+app.post('/checkingUser',checkingUser);
+app.post('/deletingUser',deletingUser);
+app.post('/updatingUser',updatingUser);
 
 /*
 app.use(sayHello);
