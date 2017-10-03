@@ -5,13 +5,10 @@ var express = require('express'),
     bcrypt = require('bcrypt'),
     mongoose = require('mongoose'),
     http = require('http'),
+	bodyParser = require('body-parser'),
     fs = require('fs'),
     nodemailer = require('nodemailer'),
     smtpTransport = require('nodemailer-smtp-transport');
-	
-	app.use(bodyParser.urlencoded({
-    extended: true
-	}));
 
 /**bodyParser.json(options)
  * Parses the text as JSON and exposes the resulting object on req.body.
@@ -58,18 +55,26 @@ var User = require('./app/userModel');
 
 function addingUser(req,res,next) {
 //  creating a document
-	console.log(req.body.email);
+	var data = req.query;
+	
+	var email = data.email;
+	var username = data.username;
+	var firstname = data.firstname;
+	var lastname = data.lastname;
+	var pwd = data.password;
+	
+	console.log();
     var addUser = new User({
-        emailID: 'jayendrakhandare',
-        userName: 'jkhandar',
-        firstName: 'jay',
-        lastName: 'khandare',
-        passWord: 'qwertyuiop[]'
+        emailID: email,
+        userName: username,
+        firstName: firstname,
+        lastName: lastname,
+        passWord: pwd
     });
 
     var mailOptions = {
         from: 'se.researchmate@gmail.com',
-        to: addUser.emailID+'@gmail.com',
+        to: addUser.email,
         subject: 'Verification code',
         text: 'Your verification code :'+ addUser.verificationNumber
     };
@@ -91,7 +96,9 @@ function addingUser(req,res,next) {
 }
 function updatingUser(req,res,next) { //for sprint 2
 //  updating a document
-    var query = {userName: 'jkhandar'};
+	var data = req.query;
+	var username = data.username;
+    var query = {userName: username};
     User.findOneAndUpdate(query, {firstName: 'Mr.Jayendra'}, function (err, upUser) {
         if (upUser == null){
             res.send('Update Failed.')
@@ -106,7 +113,10 @@ function updatingUser(req,res,next) { //for sprint 2
 
 function checkingUser(req,res,next) {
 //  viewing a document
-    var query = {"userName": "j"};
+	var data = req.query;
+	var username = data.username;
+	var password = data.password;
+    var query = {"userName": username};
     User.findOne(query, function (err, seeUser) {
         if (seeUser == null){
             res.send("userName doesn't exist in the database.");
