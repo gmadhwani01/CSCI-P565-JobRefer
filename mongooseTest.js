@@ -71,10 +71,9 @@ function addingUser(req,res,next) {
         lastName: lastname,
         passWord: pwd
     });
-
     var mailOptions = {
         from: 'se.researchmate@gmail.com',
-        to: addUser.email,
+        to: addUser.emailID,
         subject: 'Verification code',
         text: 'Your verification code :'+ addUser.verificationNumber
     };
@@ -122,15 +121,19 @@ function checkingUser(req,res,next) {
             res.send("userName doesn't exist in the database.");
         }
         else {
-            res.send('%s %s', seeUser.firstName, seeUser.lastName);
+            if(bcrypt.compareSync(password,seeUser.passWord))
+                res.send("true");
+            else
+                res.send("Incorrect Password!");
         }
-    });
+   }
+    );
     console.log("Performed a check for userName :" + query.userName);
 }
 
 function deletingUser(req,res,next) {
 //  removing a document
-    var query = {"userName": "j"};
+    var query = {"userName": req.query.username};
     User.remove(query, function () {
         console.log("User Removed Successfully.");
         res.send("Deleted the user.")
